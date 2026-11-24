@@ -3,55 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15233b">
   <title>El último secreto de Carlos</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="snow" aria-hidden="true"></div>
   <main class="shell">
-    <header>
-      <p class="eyebrow">UNA AVENTURA DE NAVIDAD</p>
-      <h1>El último secreto<br><span>de Carlos ♡</span></h1>
-      <p class="intro">Hay algo escondido entre estas luces… ¿te atreves a descubrirlo?</p>
+    <header class="topbar">
+      <div class="brand"><span class="brand-star">✦</span><span>EL ÚLTIMO SECRETO<br><b>DE CARLOS</b></span></div>
+      <div class="top-right"><span class="season">EDICIÓN NAVIDEÑA</span><span id="progressText">0 / 24</span></div>
     </header>
 
-    <section id="login" class="panel login">
-      <div class="avatar-wrap"><img src="mi_personaje.png" alt="Tu personaje pixel art de pelo liso y oscuro"></div>
-      <div class="login-content">
-        <p class="chapter">✦ ACCESO SECRETO ✦</p>
-        <h2>Hola, Carlos...</h2>
-        <p>Para comenzar esta aventura, tendrás que descubrir la contraseña.</p>
-        <label for="password">Contraseña</label>
-        <input id="password" type="password" placeholder="Escribe aquí..." autocomplete="off">
-        <button id="enter">Abrir la puerta</button>
-        <p id="login-error" class="error" aria-live="polite"></p>
+    <section id="loginScreen" class="panel login-panel">
+      <div class="pixel-scene">
+        <div class="moon"></div><div class="tree tree-a">✦</div><div class="tree tree-b">✦</div>
+        <img class="avatar-img" src="mini_yo.png" alt="Mini yo pixel-art">
+        <div class="gift gift-a">🎁</div><div class="gift gift-b">🎁</div>
+      </div>
+      <p class="eyebrow">UNA AVENTURA PARA ALGUIEN MUY ESPECIAL</p>
+      <h1>El último<br><em>secreto</em> de Carlos</h1>
+      <p class="intro">24 niveles. Pequeñas pruebas. Un secreto esperando al final.</p>
+      <label for="passwordInput">Introduce la contraseña para comenzar</label>
+      <div class="password-row"><input id="passwordInput" type="password" placeholder="Tu contraseña…" autocomplete="off"><button id="enterBtn" class="primary">ENTRAR ↗</button></div>
+      <p id="loginError" class="error" aria-live="polite"></p>
+      <p class="tiny">Pista: una palabra navideña y dos números 😉</p>
+    </section>
+
+    <section id="gameScreen" class="panel game-panel hidden">
+      <div class="game-head">
+        <div><p class="eyebrow" id="levelType">NIVEL 01 · PREGUNTA</p><h2 id="levelTitle">Una pequeña pista</h2></div>
+        <div class="level-chip" id="levelChip">01</div>
+      </div>
+      <div class="progress-track"><div id="progressBar"></div></div>
+      <div id="levelContent" class="level-content"></div>
+      <div class="game-footer">
+        <span id="statusText">Tu aventura empieza aquí</span>
+        <button id="nextBtn" class="primary hidden">CONTINUAR →</button>
       </div>
     </section>
 
-    <section id="game" class="panel hidden">
-      <div class="topline"><span id="level-label">NIVEL 1 DE 4</span><span id="progress">✦ ✧ ✧ ✧</span></div>
-      <h2 id="puzzle-title"></h2>
-      <p id="puzzle-text"></p>
-      <div id="puzzle-extra" class="puzzle-extra"></div>
-      <div class="answer-row">
-        <input id="answer" type="text" placeholder="Tu respuesta..." autocomplete="off">
-        <button id="check">Comprobar</button>
+    <section id="finishScreen" class="panel finish-panel hidden">
+      <div class="finish-stars">✦ ✧ ✦</div>
+      <p class="eyebrow">HAS LLEGADO AL FINAL</p>
+      <h1>El secreto<br><em>era este.</em></h1>
+      <div class="letter">
+        <p>Hay personas que hacen que cualquier lugar se sienta un poquito más especial. Y tú eres una de ellas.</p>
+        <p>Gracias por jugar, por cada recuerdo y por formar parte de esta pequeña aventura.</p>
+        <p class="signature">Con muchísimo cariño ♥</p>
       </div>
-      <p id="feedback" aria-live="polite"></p>
-      <button id="hint" class="ghost">Necesito una pista</button>
+      <button class="primary" onclick="location.reload()">VOLVER AL INICIO ↺</button>
     </section>
-
-    <section id="ending" class="panel hidden">
-      <div class="final-star">✦</div>
-      <p class="chapter">SECRETO DESBLOQUEADO</p>
-      <h2>Has llegado al final, Carlos.</h2>
-      <p>La última sorpresa no estaba escondida en ningún cofre.</p>
-      <blockquote>Mi lugar favorito siempre será aquel en el que estés tú. Gracias por ser mi persona favorita. Te quiero muchísimo. ♡</blockquote>
-      <p class="signature">— Tu cómplice de aventuras</p>
-      <button id="restart" class="ghost">Volver a jugar</button>
-    </section>
-
-    <footer>❄ Hecho con cariño, para una persona muy especial ❄</footer>
+    <footer>HECHO CON UN POQUITO DE MAGIA Y MUCHO CARIÑO <span>✦</span></footer>
   </main>
   <script src="script.js"></script>
 </body>

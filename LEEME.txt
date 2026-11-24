@@ -1,0 +1,26 @@
+EL ÚLTIMO SECRETO DE CARLOS — VERSIÓN ACTUALIZADA
+
+ARCHIVOS:
+- index.html: estructura de la web
+- style.css: diseño y animaciones
+- script.js: contraseña, 24 niveles y minijuegos
+- mini_yo.png: avatar pixel-art personalizado
+
+CONTRASEÑA ACTUAL: NAVIDAD23
+
+CÓMO PUBLICAR:
+1. Entra en tu repositorio de GitHub.
+2. Sustituye index.html, style.css, script.js y mini_yo.png por los de este ZIP.
+3. Conserva la configuración de GitHub Pages en main / (root).
+4. Espera a que GitHub publique los cambios y abre el mismo enlace.
+
+QUÉ INCLUYE:
+- 24 niveles alternos: 12 preguntas y 12 minijuegos diferentes.
+- Preguntas personalizadas con recuerdos y detalles que Zahira ha compartido sobre ella y Carlos.
+- Un único reto de código: descifrar AMORSIIIN en Morse.
+- El avatar mini yo aparece en la aventura.
+
+IMPORTANTE:
+- Las preguntas aceptan cualquier respuesta escrita y permiten continuar; no hay respuestas personales guardadas ni comprobación automática.
+- La contraseña está en el código del navegador; sirve como entrada temática, no como protección de información privada.
+- El progreso se reinicia al recargar la página.
