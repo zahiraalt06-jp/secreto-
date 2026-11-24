@@ -1,26 +1,34 @@
-EL ÚLTIMO SECRETO DE CARLOS — VERSIÓN ACTUALIZADA
+EL ÚLTIMO SECRETO DE CARLOS — AVENTURA DE PLATAFORMAS
+
+Esta versión sustituye las pruebas de pulsar botones por una aventura de plataformas 2D jugable.
 
 ARCHIVOS:
-- index.html: estructura de la web
-- style.css: diseño y animaciones
-- script.js: contraseña, 24 niveles y minijuegos
-- mini_yo.png: avatar pixel-art personalizado
+- index.html
+- style.css
+- script.js
+- mini_yo.png
+- LEEME.txt
 
-CONTRASEÑA ACTUAL: NAVIDAD23
+CONTRASEÑA: NAVIDAD23
 
-CÓMO PUBLICAR:
-1. Entra en tu repositorio de GitHub.
-2. Sustituye index.html, style.css, script.js y mini_yo.png por los de este ZIP.
-3. Conserva la configuración de GitHub Pages en main / (root).
-4. Espera a que GitHub publique los cambios y abre el mismo enlace.
+CÓMO SE JUEGA:
+- Ordenador: flechas izquierda/derecha o A/D para moverse; flecha arriba, W o espacio para saltar.
+- Móvil: mantén pulsadas las flechas de la pantalla para moverte y pulsa SALTAR.
+- Recoge las tres estrellas de cada mundo y llega a la puerta.
+- Evita los obstáculos; tienes tres vidas.
+- Al completar el mundo aparece una pregunta o el mensaje Morse que desbloquea el siguiente.
 
-QUÉ INCLUYE:
-- 24 niveles alternos: 12 preguntas y 12 minijuegos diferentes.
-- Preguntas personalizadas con recuerdos y detalles que Zahira ha compartido sobre ella y Carlos.
-- Un único reto de código: descifrar AMORSIIIN en Morse.
-- El avatar mini yo aparece en la aventura.
+MUNDOS:
+1. El pueblo nevado — recuerdo de Cádiz.
+2. El bosque encantado — los ojos de Carlos.
+3. El reino de los dulces — brownies y galletas.
+4. La montaña de los secretos — único código Morse: AMORSIIIN.
+5. El castillo helado — el mensaje del osito.
 
-IMPORTANTE:
-- Las preguntas aceptan cualquier respuesta escrita y permiten continuar; no hay respuestas personales guardadas ni comprobación automática.
-- La contraseña está en el código del navegador; sirve como entrada temática, no como protección de información privada.
-- El progreso se reinicia al recargar la página.
+PARA PUBLICAR:
+Descomprime este ZIP y sustituye en el repositorio de GitHub los cinco archivos anteriores. Mantén GitHub Pages en la rama main y carpeta raíz.
+
+NOTAS:
+- El progreso de la aventura se reinicia si recargas la página.
+- La contraseña es una pantalla de entrada temática, no seguridad real.
+- El juego usa un canvas 2D con gravedad, salto, plataformas, cámara lateral, estrellas coleccionables, obstáculos, vidas y controles táctiles/teclado.

@@ -1,61 +1,40 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#15233b">
-  <title>El último secreto de Carlos</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101c35">
+<title>El último secreto de Carlos</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="snow" aria-hidden="true"></div>
-  <main class="shell">
-    <header class="topbar">
-      <div class="brand"><span class="brand-star">✦</span><span>EL ÚLTIMO SECRETO<br><b>DE CARLOS</b></span></div>
-      <div class="top-right"><span class="season">EDICIÓN NAVIDEÑA</span><span id="progressText">0 / 24</span></div>
-    </header>
+<div class="stars-bg"></div>
+<main class="app">
+  <header class="top"><div class="logo">✦ EL ÚLTIMO SECRETO <b>DE CARLOS</b></div><div class="top-meta"><span id="worldLabel">MUNDO 1 · PUEBLO NEVADO</span><span id="coinLabel">✦ 0</span></div></header>
+  <section id="startScreen" class="screen start">
+    <div class="hero"><div class="moon"></div><div class="pine p1">♠</div><div class="pine p2">♠</div><div class="snowman">☃</div><img src="mini_yo.png" alt="Tu personaje" class="hero-avatar"></div>
+    <p class="eyebrow">UNA AVENTURA HECHA PARA CARLOS</p><h1>El último<br><em>secreto</em> de Carlos</h1>
+    <p class="intro">Explora mundos, recoge estrellas, supera desafíos y descubre el secreto que te espera al final.</p>
+    <label for="pass">CONTRASEÑA</label><div class="passrow"><input id="pass" type="password" placeholder="Tu contraseña"><button id="enter">JUGAR ▶</button></div><p id="passError" class="error"></p>
+    <p class="small">Pista: una palabra navideña y dos números 😉</p>
+  </section>
 
-    <section id="loginScreen" class="panel login-panel">
-      <div class="pixel-scene">
-        <div class="moon"></div><div class="tree tree-a">✦</div><div class="tree tree-b">✦</div>
-        <img class="avatar-img" src="mini_yo.png" alt="Mini yo pixel-art">
-        <div class="gift gift-a">🎁</div><div class="gift gift-b">🎁</div>
+  <section id="gameScreen" class="screen hidden">
+    <div class="hud"><div><small id="stageName">MUNDO 1</small><strong id="stageTitle">El pueblo nevado</strong></div><div class="stats"><span id="starCount">⭐ 0/3</span><span id="lifeCount">♥ ♥ ♥</span></div></div>
+    <div class="canvas-wrap"><canvas id="game" width="960" height="540" aria-label="Videojuego de plataformas"></canvas>
+      <div id="message" class="message hidden"></div>
+      <div class="mobile-controls">
+        <div class="move-controls"><button id="left" aria-label="Izquierda">◀</button><button id="right" aria-label="Derecha">▶</button></div>
+        <button id="jump" class="jump" aria-label="Saltar">SALTAR ⤒</button>
       </div>
-      <p class="eyebrow">UNA AVENTURA PARA ALGUIEN MUY ESPECIAL</p>
-      <h1>El último<br><em>secreto</em> de Carlos</h1>
-      <p class="intro">24 niveles. Pequeñas pruebas. Un secreto esperando al final.</p>
-      <label for="passwordInput">Introduce la contraseña para comenzar</label>
-      <div class="password-row"><input id="passwordInput" type="password" placeholder="Tu contraseña…" autocomplete="off"><button id="enterBtn" class="primary">ENTRAR ↗</button></div>
-      <p id="loginError" class="error" aria-live="polite"></p>
-      <p class="tiny">Pista: una palabra navideña y dos números 😉</p>
-    </section>
-
-    <section id="gameScreen" class="panel game-panel hidden">
-      <div class="game-head">
-        <div><p class="eyebrow" id="levelType">NIVEL 01 · PREGUNTA</p><h2 id="levelTitle">Una pequeña pista</h2></div>
-        <div class="level-chip" id="levelChip">01</div>
-      </div>
-      <div class="progress-track"><div id="progressBar"></div></div>
-      <div id="levelContent" class="level-content"></div>
-      <div class="game-footer">
-        <span id="statusText">Tu aventura empieza aquí</span>
-        <button id="nextBtn" class="primary hidden">CONTINUAR →</button>
-      </div>
-    </section>
-
-    <section id="finishScreen" class="panel finish-panel hidden">
-      <div class="finish-stars">✦ ✧ ✦</div>
-      <p class="eyebrow">HAS LLEGADO AL FINAL</p>
-      <h1>El secreto<br><em>era este.</em></h1>
-      <div class="letter">
-        <p>Hay personas que hacen que cualquier lugar se sienta un poquito más especial. Y tú eres una de ellas.</p>
-        <p>Gracias por jugar, por cada recuerdo y por formar parte de esta pequeña aventura.</p>
-        <p class="signature">Con muchísimo cariño ♥</p>
-      </div>
-      <button class="primary" onclick="location.reload()">VOLVER AL INICIO ↺</button>
-    </section>
-    <footer>HECHO CON UN POQUITO DE MAGIA Y MUCHO CARIÑO <span>✦</span></footer>
-  </main>
-  <script src="script.js"></script>
-</body>
-</html>
+    </div>
+    <div class="under"><span id="hint">Muévete, salta y recoge las estrellas.</span><button id="pause">Ⅱ PAUSA</button></div>
+  </section>
+  <section id="overlayScreen" class="screen overlay hidden">
+    <div class="overlay-card"><p class="eyebrow" id="overlayEyebrow">NUEVO MUNDO</p><h2 id="overlayTitle">¡Nivel superado!</h2><p id="overlayText"></p><div id="overlayExtra"></div><button id="overlayButton">CONTINUAR ▶</button></div>
+  </section>
+  <section id="endScreen" class="screen end hidden"><div class="end-star">✦</div><p class="eyebrow">HAS COMPLETADO LA AVENTURA</p><h1>Has encontrado<br><em>el último secreto</em></h1><div class="letter"><p>Hay viajes que se hacen con los pies y otros que se hacen con el corazón. Gracias por recorrer este pequeño mundo y por todos los recuerdos que todavía nos quedan por crear.</p><p class="signature">Con muchísimo cariño ♥</p></div><button id="again">VOLVER A JUGAR ↻</button></section>
+  <footer>UNA PEQUEÑA AVENTURA · EDICIÓN NAVIDEÑA ✦</footer>
+</main>
+<script src="script.js"></script>
+</body></html>

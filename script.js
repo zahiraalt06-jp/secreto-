@@ -1,49 +1,86 @@
-const PASSWORD = "NAVIDAD23";
-const $ = id => document.getElementById(id);
-let current = 0, completed = new Set(), gameState = {};
-const levels = [
- {type:"question",title:"La primera pista",prompt:"Hay un lugar que siempre tendrá un significado especial para nosotros… ¿Te acuerdas de cuando nos vimos en Cádiz, justo en la puerta del hotel? Cuéntame qué recuerdas de aquel momento.",hint:"Escribe ese recuerdo con tus propias palabras."},
- {type:"platform",title:"Salta por la nieve",prompt:"¡Aventura en marcha! Ayuda al personaje a saltar el tronco y recoger la estrella.",hint:"Pulsa SALTAR tres veces para superar el camino."},
- {type:"question",title:"Kilómetros de por medio",prompt:"Aunque a veces haya kilómetros entre nosotros, ¿qué es lo que más nos ayuda a sentirnos cerca?",hint:"Piensa en nuestras llamadas, mensajes o pequeños detalles."},
- {type:"escape",title:"La cabaña cerrada",prompt:"Has encontrado una cabaña. Tres pistas esconden el código de la puerta.",hint:"Lee las pistas y resuelve el código de tres cifras."},
- {type:"question",title:"Si pudieras elegir…",prompt:"Si pudiéramos escaparnos ahora mismo a cualquier lugar, ¿dónde te gustaría ir conmigo?",hint:"Vale cualquier lugar del mundo."},
- {type:"memory",title:"Memoria navideña",prompt:"Encuentra las seis parejas. ¡A ver qué tal anda esa memoria!",hint:"Toca dos cartas para descubrir sus dibujos."},
- {type:"question",title:"Una mirada que conozco",prompt:"¿De qué color son los ojos de Carlos?",hint:"Una pista: es un color que ya me has oído mencionar más de una vez."},
- {type:"hidden",title:"Objetos escondidos",prompt:"La habitación está llena de cosas. Encuentra los tres objetos especiales.",hint:"Busca la estrella, la llave y el regalo."},
- {type:"question",title:"Nuestro plan perfecto",prompt:"Describe un día perfecto juntos, desde que empieza hasta que termina.",hint:"No hace falta que sea un plan complicado."},
- {type:"puzzle",title:"Ordena el recuerdo",prompt:"Ordena las piezas del 1 al 4 para abrir el cofre.",hint:"Pulsa las piezas en el orden correcto."},
- {type:"question",title:"Un dulce detalle",prompt:"¿Qué dulces caseros pensé en preparar para mandarle a Carlos?",hint:"Eran dos ideas de repostería que aguantan bien un viaje."},
- {type:"obstacle",title:"Lluvia de estrellas",prompt:"¡Atrapa cinco estrellas antes de que termine el reto!",hint:"Pulsa las estrellas que aparezcan."},
- {type:"question",title:"La palabra secreta",prompt:"Si tuvieras que describir lo nuestro con una sola palabra, ¿cuál elegirías?",hint:"Una palabra que para ti lo diga todo."},
- {type:"cipher",title:"Mensaje en código Morse",prompt:"¡Ha llegado una transmisión secreta! Descifra el mensaje en código Morse para descubrir la palabra escondida.",hint:"Cada grupo de puntos y rayas representa una letra. Separa los grupos y escribe la palabra completa."},
- {type:"question",title:"Una mirada al futuro",prompt:"¿Qué es lo que más ilusión te hace de todo lo que todavía nos queda por vivir?",hint:"Piensa en algo que aún no haya pasado."},
- {type:"target",title:"La puntería del reno",prompt:"Toca cinco veces el reno que aparece dentro del campo.",hint:"¡No dejes que se escape!"},
- {type:"question",title:"Un mensaje pequeñito",prompt:"¿Qué frase quería que dijera el osito con grabadora que preparé para Carlos?",hint:"Era una frase cortita y llena de cariño."},
- {type:"maze",title:"El laberinto helado",prompt:"Guía al personaje hasta la estrella. ¡Cuidado con las paredes!",hint:"Usa las flechas para llegar a la meta."},
- {type:"question",title:"El recuerdo favorito",prompt:"¿Cuál ha sido uno de tus momentos favoritos conmigo hasta ahora?",hint:"Cuéntame por qué lo elegiste."},
- {type:"music",title:"Eco de campanitas",prompt:"Escucha la secuencia y repítela en el mismo orden.",hint:"Pulsa EMPEZAR y después repite los cuatro sonidos."},
- {type:"question",title:"De una ciudad a otra",prompt:"¿Entre qué dos ciudades está nuestra historia a distancia?",hint:"Una está en la Comunidad Valenciana y la otra en Andalucía."},
- {type:"word",title:"Palabras revueltas",prompt:"Ordena las letras para descubrir la palabra navideña.",hint:"Letras: R · G · E · A · L · O. Es algo que se entrega con cariño."},
- {type:"question",title:"Antes del secreto…",prompt:"¿Hay algo que quieras decirme y que todavía no me hayas dicho?",hint:"Tómate tu tiempo. Esta es la última pregunta."},
- {type:"final",title:"El último candado",prompt:"Has llegado al último nivel. Resuelve el pequeño candado para descubrir el secreto.",hint:"La palabra que abre el cofre está formada por tres letras: L U Z."}
+const PASSWORD="NAVIDAD23";
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+const $=id=>document.getElementById(id);
+const avatar=new Image();avatar.src="mini_yo.png";
+let scene="start",world=0,coins=0,lives=3,paused=false,raf=0,last=0,camera=0,keys={},touch={left:false,right:false};
+const TILE=48,GRAVITY=1900;
+const worlds=[
+ {name:"El pueblo nevado",sky:"#9bd7f2",ground:"#eaf7ff",top:"#83b7a5",platform:"#8b6c58",length:3000,stars:[420,1050,1790],hazards:[850,1450,2240],question:"¿Dónde nos vimos por primera vez?",answer:"Cádiz, en la puerta del hotel",morse:false},
+ {name:"El bosque encantado",sky:"#91c7d7",ground:"#e5f2e7",top:"#578b70",platform:"#6e594a",length:3300,stars:[600,1320,2400],hazards:[980,1870,2700],question:"¿De qué color son los ojos de Carlos?",answer:"Verdes",morse:false},
+ {name:"El reino de los dulces",sky:"#f5c5d5",ground:"#fff0e8",top:"#c77c91",platform:"#98715f",length:3400,stars:[700,1600,2650],hazards:[1100,2100,2900],question:"¿Qué dulces caseros pensé en preparar para Carlos?",answer:"Brownies y galletas",morse:false},
+ {name:"La montaña de los secretos",sky:"#879fcb",ground:"#e7edff",top:"#8798b8",platform:"#6b6686",length:3600,stars:[520,1450,2850],hazards:[900,1900,3100],question:"Descifra la palabra secreta",answer:"AMORSIIIN",morse:true},
+ {name:"El castillo helado",sky:"#9eb8e6",ground:"#f8f6ff",top:"#a5a0c9",platform:"#77718f",length:3900,stars:[850,1900,3100],hazards:[1250,2400,3300],question:"¿Qué frase quería que dijera el osito de voz?",answer:"Te quiero mucho Carlos",morse:false}
 ];
-function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).classList.add("hidden")}
-$("enterBtn").addEventListener("click",login); $("passwordInput").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
-function login(){if($("passwordInput").value.trim().toUpperCase()===PASSWORD){hide("loginScreen");show("gameScreen");render()}else{$("loginError").textContent="Esa no es la contraseña… ¡prueba otra vez!";$("passwordInput").value=""}}
-$("nextBtn").addEventListener("click",()=>{if(!completed.has(current))return; if(current===23){hide("gameScreen");show("finishScreen");return}current++;render()});
-function render(){gameState={};const l=levels[current];$("levelType").textContent=`NIVEL ${String(current+1).padStart(2,"0")} · ${l.type==="question"?"PREGUNTA":"MINIJUEGO"}`;$("levelTitle").textContent=l.title;$("levelChip").textContent=String(current+1).padStart(2,"0");$("progressText").textContent=`${completed.size} / 24`;$("progressBar").style.width=(completed.size/24*100)+"%";$("statusText").textContent=l.hint;$("nextBtn").classList.toggle("hidden",!completed.has(current));$("levelContent").innerHTML="";const c=$("levelContent");const p=document.createElement("p");p.className="prompt";p.textContent=l.prompt;c.append(p);const h=document.createElement("p");h.className="subprompt";h.textContent=l.hint;c.append(h);({question:question,platform:platform,escape:escapeRoom,memory:memory,hidden:hiddenObjects,puzzle:puzzle,obstacle:obstacle,cipher:cipher,target:target,maze:maze,music:music,word:word,final:finalLock}[l.type])(c);$("progressText").textContent=`${completed.size} / 24`}
-function finish(){completed.add(current);$("nextBtn").classList.remove("hidden");$("statusText").textContent="¡Nivel superado! ✦";$("progressText").textContent=`${completed.size} / 24`;$("progressBar").style.width=(completed.size/24*100)+"%"}
-function question(c){const box=document.createElement("div");box.className="answer-row";box.innerHTML='<input id="answer" placeholder="Escribe aquí tu respuesta…"><button class="primary" id="sendAnswer">GUARDAR ↗</button>';c.append(box);$("sendAnswer").onclick=()=>{if(!$("answer").value.trim()){ $("answer").focus();return}finish()}}
-function platform(c){let n=0;const stage=document.createElement("div");stage.className="game-stage";stage.innerHTML='<div class="runner" id="runner"><img class="game-avatar" src="mini_yo.png" alt="Mini yo"></div><span class="obstacle">🪵</span><span class="obstacle">⭐</span><p id="jumpCount">Saltos: 0 / 3</p><button class="action" id="jump">SALTAR ↑</button>';c.append(stage);$("jump").onclick=()=>{n++;$("runner").style.transform=`translateY(${n%2?-28:0}px)`;$("jumpCount").textContent=`Saltos: ${Math.min(n,3)} / 3`;if(n>=3)finish()}}
-function escapeRoom(c){c.insertAdjacentHTML("beforeend",'<div class="choice-grid"><div class="choice">Pista 1: la primera cifra es 2.</div><div class="choice">Pista 2: la segunda es el doble de 2.</div><div class="choice">Pista 3: la última es 1 menos que la segunda.</div></div><div class="answer-row"><input id="code" inputmode="numeric" maxlength="3" placeholder="Código de 3 cifras"><button class="primary" id="unlock">ABRIR</button></div><div class="feedback" id="fb"></div>');$("unlock").onclick=()=>{if($("code").value==="243")finish();else $("fb").textContent="La puerta sigue cerrada… vuelve a mirar las pistas."}}
-function memory(c){const icons=["🎄","🎁","⭐","🔔","🧦","❄️"];let deck=[...icons,...icons].sort(()=>Math.random()-.5),open=[],matched=0;const grid=document.createElement("div");grid.className="memory-grid";deck.forEach((v,i)=>{const b=document.createElement("button");b.className="memory-card";b.textContent="?";b.onclick=()=>{if(b.classList.contains("matched")||open.length===2||open.some(x=>x.i===i))return;b.textContent=v;b.classList.add("open");open.push({i,b,v});if(open.length===2){if(open[0].v===open[1].v){open.forEach(x=>x.b.classList.add("matched"));matched++;open=[];if(matched===6)finish()}else{const pair=open;setTimeout(()=>{pair.forEach(x=>{x.b.textContent="?";x.b.classList.remove("open")});open=[]},650)}}};grid.append(b)});c.append(grid)}
-function hiddenObjects(c){const wanted=["⭐","🗝️","🎁"];let found=[];const area=document.createElement("div");area.className="objects";["🧸","⭐","🍪","🎄","🗝️","🕯️","🎁","🧤","🍬","🔔","📦","❄️"].sort(()=>Math.random()-.5).forEach(v=>{const b=document.createElement("button");b.className="object";b.textContent=v;b.onclick=()=>{if(wanted.includes(v)&&!found.includes(v)){found.push(v);b.classList.add("found");b.disabled=true;if(found.length===3)finish()}else{b.style.opacity=".35"}};area.append(b)});c.append(area);const f=document.createElement("p");f.className="feedback";f.textContent="Encontrados: 0 / 3";area.addEventListener("click",()=>f.textContent=`Encontrados: ${found.length} / 3`);c.append(f)}
-function puzzle(c){const order=[3,1,4,2];let selected=[];const wrap=document.createElement("div");wrap.className="sequence";[2,4,1,3].forEach(v=>{const b=document.createElement("button");b.className="tile";b.textContent="Pieza "+v;b.onclick=()=>{if(selected.includes(v))return;selected.push(v);b.classList.add("selected");if(selected.length===4){if(selected.join("")==="1234")finish();else{selected=[];wrap.querySelectorAll("button").forEach(x=>x.classList.remove("selected"))}}};wrap.append(b)});c.append(wrap)}
-function obstacle(c){const area=document.createElement("div");area.className="game-stage";const msg=document.createElement("p");msg.className="prompt";msg.textContent="Pulsa el botón cuando aparezca AHORA.";const b=document.createElement("button");b.className="action";b.textContent="PREPARADO";let waiting=false,ready=false,timer=null;b.onclick=()=>{if(!waiting&&!ready){waiting=true;b.textContent="ESPERA…";msg.textContent="Concéntrate…";timer=setTimeout(()=>{ready=true;waiting=false;b.textContent="¡AHORA! PULSA";msg.textContent="¡Es el momento!"},1200+Math.random()*1800)}else if(waiting){clearTimeout(timer);waiting=false;b.textContent="DEMASIADO PRONTO · OTRA VEZ";msg.textContent="¡Te has adelantado! Vuelve a intentarlo."}else if(ready){ready=false;b.textContent="¡ACERTASTE!";msg.textContent="Tus reflejos están a punto.";finish()}};area.append(msg,b);c.append(area)}
-function cipher(c){const morse=document.createElement("div");morse.className="choice-grid";morse.innerHTML='<div class="choice" style="grid-column:1/-1;font-size:1.25rem;letter-spacing:.12em;line-height:1.9">.- / -- / --- / .-. / ... / .. / .. / .. / -.</div>';c.append(morse);c.insertAdjacentHTML("beforeend",'<div class="answer-row"><input id="decoded" placeholder="Escribe la palabra descifrada…"><button class="primary" id="decode">DESCIFRAR</button></div><div class="feedback" id="fb"></div>');$("decode").onclick=()=>{if($("decoded").value.trim().toUpperCase().replace(/[^A-Z]/g,"")==="AMORSIIIN")finish();else $("fb").textContent="Casi… separa los grupos de puntos y rayas y traduce cada letra."}}
-function target(c){let hits=0;const area=document.createElement("div");area.className="target-area";const score=document.createElement("p");score.className="feedback";score.textContent="Aciertos: 0 / 5";c.append(area,score);function move(){area.innerHTML="";const b=document.createElement("button");b.className="target";b.textContent="🦌";b.style.left=Math.random()*80+"%";b.style.top=Math.random()*65+"%";b.onclick=()=>{hits++;score.textContent=`Aciertos: ${hits} / 5`;if(hits===5){area.textContent="¡Reto superado!";finish()}else move()};area.append(b)}move()}
-function maze(c){const map=["..#..",".#...","...#.","##...","....."];let pos=[0,0];const wrap=document.createElement("div");const grid=document.createElement("div");grid.className="maze";function draw(){grid.innerHTML="";map.forEach((row,y)=>[...row].forEach((cell,x)=>{const d=document.createElement("div");d.className="maze-cell"+(cell==="#"?" wall":"")+(x===4&&y===4?" goal":"");d.textContent=pos[0]===x&&pos[1]===y?"🧍🏻‍♀️":x===4&&y===4?"⭐":"";grid.append(d)}))}draw();const controls=document.createElement("div");controls.className="maze-controls";[["",""],["↑",-1,0],["",""],["←",0,-1],["↓",1,0],["→",0,1]].forEach(([label,dy,dx])=>{const b=document.createElement("button");b.className="action";b.textContent=label||" ";if(label)b.onclick=()=>{let y=pos[1]+Number(dy||0),x=pos[0]+Number(dx||0);if(y>=0&&y<5&&x>=0&&x<5&&map[y][x]!=="#"){pos=[x,y];draw();if(x===4&&y===4)finish()}};controls.append(b)});wrap.append(grid,controls);c.append(wrap)}
-function music(c){let seq=[],input=[],started=false;const notes=[261.6,329.6,392,523.3];const names=["DO","MI","SOL","DO↑"];const row=document.createElement("div");row.className="choice-grid";const msg=document.createElement("p");msg.className="feedback";msg.textContent="Pulsa empezar para escuchar.";const start=document.createElement("button");start.className="action";start.textContent="EMPEZAR";start.onclick=()=>{seq=[0,2,1,3];input=[];started=true;msg.textContent="Ahora repite la secuencia.";let i=0;const play=()=>{if(i>=seq.length)return;beep(seq[i]);i++;setTimeout(play,550)};play()};c.append(start,row,msg);names.forEach((n,i)=>{const b=document.createElement("button");b.className="choice";b.textContent="♫ "+n;b.onclick=()=>{if(!started)return;beep(i);input.push(i);if(input.length===4){if(input.join("")===seq.join("")){msg.textContent="¡Perfecto!";finish()}else{msg.textContent="No era esa secuencia. ¡Prueba de nuevo!";input=[]}}};row.append(b)})}
-function beep(i){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=[261.6,329.6,392,523.3][i];osc.connect(gain);gain.connect(ctx.destination);gain.gain.setValueAtTime(.12,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.28);osc.start();osc.stop(ctx.currentTime+.3)}catch(e){}}
-function word(c){c.insertAdjacentHTML("beforeend",'<div class="answer-row"><input id="wordAnswer" placeholder="Escribe la palabra…"><button class="primary" id="wordCheck">COMPROBAR</button></div><div class="feedback" id="fb"></div>');$("wordCheck").onclick=()=>{if($("wordAnswer").value.trim().toUpperCase()==="REGALO")finish();else $("fb").textContent="Reordena las letras: R · G · E · A · L · O."}}
-function finalLock(c){c.insertAdjacentHTML("beforeend",'<div class="answer-row"><input id="finalAnswer" maxlength="3" placeholder="La clave de tres letras…"><button class="primary" id="finalCheck">ABRIR COFRE</button></div><div class="feedback" id="fb"></div>');$("finalCheck").onclick=()=>{if($("finalAnswer").value.trim().toUpperCase()==="LUZ"){finish();$("fb").textContent="¡El cofre se ha abierto!";}else $("fb").textContent="Pista: la luz también puede ser un pequeño regalo."}}
+let player, platforms, starItems, hazards, exit, worldDone, checkpoint=0;
+function buildWorld(){
+ const w=worlds[world];camera=0;worldDone=false;
+ player={x:70,y:300,w:34,h:48,vx:0,vy:0,onGround:false,face:1,inv:0};
+ platforms=[{x:0,y:460,w:w.length,h:100},{x:240,y:365,w:150,h:22},{x:520,y:310,w:160,h:22},{x:780,y:390,w:170,h:22},{x:1110,y:330,w:180,h:22},{x:1430,y:270,w:160,h:22},{x:1740,y:385,w:180,h:22},{x:2050,y:320,w:180,h:22},{x:2390,y:260,w:190,h:22},{x:2730,y:370,w:180,h:22},{x:3050,y:310,w:180,h:22}];
+ starItems=w.stars.map(x=>({x,y:platforms.find(p=>x>=p.x&&x<=p.x+p.w)?.y-35||405,taken:false}));
+ hazards=w.hazards.map(x=>({x,y:412,w:38,h:48,phase:Math.random()*6}));
+ exit={x:w.length-130,y:365,w:54,h:95};
+ $("worldLabel").textContent=`MUNDO ${world+1} · ${w.name.toUpperCase()}`;
+ $("stageName").textContent=`MUNDO ${world+1} / 5`; $("stageTitle").textContent=w.name;
+ $("starCount").textContent=`⭐ 0/3`; $("lifeCount").textContent="♥ ".repeat(lives);
+ $("hint").textContent="Recoge las 3 estrellas y llega a la puerta. ¡Cuidado con los obstáculos!";
+ $("message").classList.add("hidden");
+}
+function showScreen(id){["startScreen","gameScreen","overlayScreen","endScreen"].forEach(s=>$(s).classList.toggle("hidden",s!==id))}
+$("enter").onclick=()=>{if($("pass").value.trim().toUpperCase()!==PASSWORD){$("passError").textContent="Esa contraseña no abre la aventura…";return}world=0;coins=0;lives=3;buildWorld();showScreen("gameScreen");scene="game";last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)};
+$("pass").addEventListener("keydown",e=>{if(e.key==="Enter")$("enter").click()});
+$("again").onclick=()=>{scene="start";$("pass").value="";showScreen("startScreen")};
+function bindHold(id,key){const el=$(id);const down=e=>{e.preventDefault();touch[key]=true};const up=e=>{e.preventDefault();touch[key]=false};el.addEventListener("pointerdown",down);["pointerup","pointerleave","pointercancel"].forEach(ev=>el.addEventListener(ev,up))}
+bindHold("left","left");bindHold("right","right");
+$("jump").addEventListener("pointerdown",e=>{e.preventDefault();jump()});
+window.addEventListener("keydown",e=>{if(["ArrowLeft","ArrowRight","ArrowUp"," ","a","d","w"].includes(e.key))e.preventDefault();keys[e.key.toLowerCase()]=true;if(e.key===" "||e.key==="ArrowUp"||e.key.toLowerCase()==="w")jump();if(e.key==="Escape")togglePause()});
+window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+function jump(){if(scene==="game"&&!paused&&player?.onGround){player.vy=-690;player.onGround=false}}
+$("pause").onclick=togglePause;
+function togglePause(){if(scene!=="game")return;paused=!paused;$("message").textContent=paused?"PAUSA · Pulsa Ⅱ PAUSA para continuar":"";
+ $("message").classList.toggle("hidden",!paused)}
+function loop(t){if(scene!=="game")return;const dt=Math.min((t-last)/1000,.033);last=t;if(!paused)update(dt);draw();raf=requestAnimationFrame(loop)}
+function update(dt){
+ const w=worlds[world],left=keys.arrowleft||keys.a||touch.left,right=keys.arrowright||keys.d||touch.right;
+ player.vx=(right?300:0)-(left?300:0);if(player.vx)player.face=Math.sign(player.vx);
+ player.x+=player.vx*dt;player.x=Math.max(0,Math.min(w.length-player.w,player.x));
+ player.vy+=GRAVITY*dt;let oldY=player.y;player.y+=player.vy*dt;player.onGround=false;
+ for(const p of platforms){if(player.x+player.w>p.x&&player.x<p.x+p.w&&oldY+player.h<=p.y+8&&player.y+player.h>=p.y&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.onGround=true}}
+ if(player.y>650)hurt();
+ if(player.inv>0)player.inv-=dt;
+ for(const s of starItems){if(!s.taken&&Math.abs((player.x+player.w/2)-s.x)<34&&Math.abs((player.y+player.h/2)-s.y)<44){s.taken=true;coins++;$("starCount").textContent=`⭐ ${starItems.filter(x=>x.taken).length}/3`}}
+ for(const h of hazards){h.phase+=dt;if(Math.abs(player.x+player.w/2-(h.x+18))<30&&player.y+player.h>h.y+5&&player.y<h.y+h.h&&player.inv<=0)hurt()}
+ camera=Math.max(0,Math.min(w.length-canvas.width,player.x-canvas.width*.36));
+ if(player.x+player.w>exit.x&&starItems.every(s=>s.taken)){worldDone=true;showQuestion()}
+}
+function hurt(){lives--; $("lifeCount").textContent="♥ ".repeat(Math.max(0,lives));if(lives<=0){lives=3;player.x=70;player.y=300;player.vy=0; $("hint").textContent="¡No pasa nada! Has recuperado tus tres vidas. Inténtalo otra vez."}else{player.x=Math.max(70,player.x-180);player.y=280;player.vy=0;player.inv=1.5}}
+function showQuestion(){
+ scene="question";cancelAnimationFrame(raf);const w=worlds[world];
+ $("overlayEyebrow").textContent=`MUNDO ${world+1} COMPLETADO`; $("overlayTitle").textContent=w.morse?"TRANSMISIÓN SECRETA":"¡Has encontrado una pista!";
+ $("overlayText").textContent=w.question;
+ const extra=$("overlayExtra");extra.innerHTML="";
+ if(w.morse){extra.innerHTML='<div class="morse">.- / -- / --- / .-. / ... / .. / .. / .. / -.</div><div class="morse-input"><input id="answer" placeholder="Descifra la palabra"><button id="checkAnswer">COMPROBAR</button></div><p id="answerFeedback"></p>'; $("checkAnswer").onclick=()=>checkAnswer(w.answer)}
+ else{extra.innerHTML=`<p class="answer-hint">Escribe tu respuesta para desbloquear el siguiente mundo.</p><div class="morse-input"><input id="answer" placeholder="Tu respuesta"><button id="checkAnswer">DESBLOQUEAR</button></div><p id="answerFeedback"></p>`;$("checkAnswer").onclick=()=>checkAnswer(w.answer)}
+ $("overlayButton").classList.add("hidden");showScreen("overlayScreen");
+}
+function checkAnswer(expected){const val=$("answer").value.trim().toLocaleUpperCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g,"");const exp=expected.toLocaleUpperCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(val===exp){$("answerFeedback").textContent="¡Correcto! La aventura continúa ✦";$("overlayButton").classList.remove("hidden");$("overlayButton").textContent=world===4?"DESCUBRIR EL SECRETO":"SIGUIENTE MUNDO ▶";$("overlayButton").onclick=nextWorld}else{$("answerFeedback").textContent="No es esa todavía. ¡Piensa en la pista y vuelve a intentarlo!"}}
+function nextWorld(){if(world===4){scene="end";showScreen("endScreen");return}world++;scene="game";buildWorld();showScreen("gameScreen");last=performance.now();raf=requestAnimationFrame(loop)}
+function draw(){
+ const w=worlds[world];ctx.clearRect(0,0,canvas.width,canvas.height);const grad=ctx.createLinearGradient(0,0,0,540);grad.addColorStop(0,w.sky);grad.addColorStop(1,"#e8f3ff");ctx.fillStyle=grad;ctx.fillRect(0,0,960,540);
+ // distant snowy hills
+ ctx.fillStyle="#ffffff70";for(let i=0;i<9;i++){let x=((i*260-camera*.18)%1100+1100)%1100-60;ctx.beginPath();ctx.arc(x,390,110+(i%3)*20,Math.PI,0);ctx.fill()}
+ // stars/snow
+ for(let i=0;i<70;i++){let x=(i*137-camera*.35)%960,y=(i*71)%360;ctx.fillStyle="#fff9";ctx.fillRect((x+960)%960,y,3,3)}
+ // platforms and floor
+ for(const p of platforms){let x=p.x-camera;if(x+p.w<0||x>960)continue;ctx.fillStyle=w.ground;ctx.fillRect(x,p.y,p.w,p.h);ctx.fillStyle=w.top;ctx.fillRect(x,p.y,p.w,10);ctx.fillStyle="#ffffff88";for(let k=8;k<p.w;k+=28)ctx.fillRect(x+k,p.y+13,12,3)}
+ // decorations
+ for(let x=120;x<w.length;x+=360){let sx=x-camera;if(sx>-40&&sx<1000){ctx.fillStyle="#285c54";ctx.beginPath();ctx.moveTo(sx,330);ctx.lineTo(sx-42,430);ctx.lineTo(sx+42,430);ctx.fill();ctx.fillStyle="#8a684e";ctx.fillRect(sx-7,430,14,30)}}
+ // hazards
+ for(const h of hazards){let x=h.x-camera;if(x>-50&&x<1000){ctx.fillStyle="#7b3e4e";ctx.beginPath();ctx.moveTo(x,h.y+45);ctx.lineTo(x+18,h.y+4+Math.sin(h.phase*5)*3);ctx.lineTo(x+38,h.y+45);ctx.fill();ctx.fillStyle="#f4b5c3";ctx.fillRect(x+9,h.y+32,20,6)}}
+ // stars
+ for(const s of starItems){if(s.taken)continue;let x=s.x-camera;ctx.save();ctx.translate(x,s.y+Math.sin(tick()/220+s.x)*5);ctx.fillStyle="#ffcf45";ctx.strokeStyle="#fff5bb";ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<10;i++){let r=i%2?9:20,a=-Math.PI/2+i*Math.PI/5;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r)}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
+ // exit door
+ let ex=exit.x-camera;ctx.fillStyle="#603d65";ctx.fillRect(ex,exit.y,exit.w,95);ctx.fillStyle="#f8d98a";ctx.fillRect(ex+9,exit.y+10,exit.w-18,85);ctx.fillStyle="#714a69";ctx.fillRect(ex+17,exit.y+20,exit.w-34,75);ctx.fillStyle="#ffd66e";ctx.beginPath();ctx.arc(ex+exit.w-15,exit.y+54,4,0,Math.PI*2);ctx.fill();
+ // player
+ let px=player.x-camera;if(player.inv<=0||Math.floor(performance.now()/90)%2===0){if(avatar.complete&&avatar.naturalWidth){ctx.save();if(player.face<0){ctx.translate(px+player.w,0);ctx.scale(-1,1);ctx.drawImage(avatar,0,player.y,player.w,player.h)}else ctx.drawImage(avatar,px,player.y,player.w,player.h);ctx.restore()}else{ctx.fillStyle="#b94368";ctx.fillRect(px,player.y,player.w,player.h)}}
+}
+function tick(){return performance.now()}
